@@ -9,3 +9,4 @@
 | 05 | [05-session-report.md](./05-session-report.md) | Golden Master·GREEN PASS·Harness·PR 정리 | [05-session-transcript.md](../Prompting/05-session-transcript.md) |
 | 06 | [06-session-report.md](./06-session-report.md) | REFACTOR Smell 진단·P0~P2 표·refactor-safe 후보 | [06-session-transcript.md](../Prompting/06-session-transcript.md) |
 | 07 | [07-session-report.md](./07-session-report.md) | 리뷰 반영·REFACTOR Safe #1·pytest 1 passed | [07-session-transcript.md](../Prompting/07-session-transcript.md) |
+| 08 | [08-session-report.md](./08-session-report.md) | GUI 스모크 테스트(PySide6)·control/boundary·pytest 1 passed | [08-session-transcript.md](../Prompting/08-session-transcript.md) |
