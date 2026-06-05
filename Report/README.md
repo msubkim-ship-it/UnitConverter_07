@@ -7,3 +7,4 @@
 | 03 | [03-session-report.md](./03-session-report.md) | D-LOC-01 RED Skeleton·pytest RED 게이트 | [03-session-transcript.md](../Prompting/03-session-transcript.md) |
 | 04 | [04-session-report.md](./04-session-report.md) | D-LOC-01 GREEN Minimal·constants SSOT·pytest PASS | [04-session-transcript.md](../Prompting/04-session-transcript.md) |
 | 05 | [05-session-report.md](./05-session-report.md) | Golden Master·GREEN PASS·Harness·PR 정리 | [05-session-transcript.md](../Prompting/05-session-transcript.md) |
+| 06 | [06-session-report.md](./06-session-report.md) | REFACTOR Smell 진단·P0~P2 표·refactor-safe 후보 | [06-session-transcript.md](../Prompting/06-session-transcript.md) |

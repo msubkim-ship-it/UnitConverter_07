@@ -5,7 +5,7 @@ import pytest
 
 @pytest.fixture
 def grid_g1():
-    """G1 row-major ratio grid — GREEN: (1.0, FEET_PER_METER, YARD_PER_METER) via entity.constants."""
-    from entity.constants import FEET_PER_METER, YARD_PER_METER
+    """G1 row-major ratio grid — SSOT via entity.constants.RATIOS_ROW_MAJOR."""
+    from entity.constants import RATIOS_ROW_MAJOR
 
-    return (1.0, FEET_PER_METER, YARD_PER_METER)
+    return RATIOS_ROW_MAJOR

@@ -1,9 +1,9 @@
-"""Golden Master approval helper."""
+"""Golden Master approval helper — boundary UI Track only."""
 
 import os
 from pathlib import Path
 
-_GOLDEN_ROOT = Path(__file__).resolve().parent / "golden"
+_GOLDEN_ROOT = Path(__file__).resolve().parent / "boundary" / "golden"
 
 
 def golden_path(relative: str) -> Path:
@@ -11,9 +11,10 @@ def golden_path(relative: str) -> Path:
 
 
 def assert_matches_golden(actual: str, relative: str) -> None:
-    """Compare *actual* text to ``tests/golden/{relative}``.
+    """Compare *actual* text to ``tests/boundary/golden/{relative}``.
 
     Set ``UPDATE_GOLDEN=1`` to write or refresh the baseline file.
+    Use only from ``tests/boundary/test_u_*.py`` after U-* GREEN.
     """
     path = golden_path(relative)
     if os.environ.get("UPDATE_GOLDEN") == "1":
