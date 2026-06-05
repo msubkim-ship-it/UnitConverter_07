@@ -168,3 +168,4 @@ Review Loop 순서: **RED FAIL 확인 → GREEN PASS → PRD/에러코드 대조
 - 헌법: `.cursorrules`
 - D-* TC ID: [reference.md](reference.md)
 - Harness: `pyproject.toml`, `tests/`, `src/`
+- **TC 1건 통합:** `.cursor/commands/tdd-session.md` — RED→GREEN→(REFACTOR)→`/export-session`
