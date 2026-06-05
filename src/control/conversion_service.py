@@ -1,64 +1,91 @@
 """Length conversion use-case — orchestrates entity SSOT ratios."""
 
-from entity.constants import DEFAULT_UNITS, UNIT_RATIOS
+from entity.constants import BASE_UNIT, DEFAULT_UNITS, UNIT_RATIOS
+from entity.exceptions import ErrorCode
 
 
 class ConversionError(Exception):
-    """Smoke-test level validation error (E001~E007 SSOT는 exceptions.py 도입 후 교체)."""
+    """Domain validation error carrying ErrorCode SSOT."""
 
-    def __init__(self, message: str) -> None:
-        super().__init__(message)
-        self.message = message
+    def __init__(self, code: ErrorCode) -> None:
+        self.code = code
+        super().__init__(code.value)
 
 
 def parse_unit_value(raw: str) -> tuple[str, float]:
     """Parse `unit:value` input (FR-01)."""
     text = raw.strip()
     if not text:
-        raise ConversionError("빈 입력입니다. `단위:값` 형식으로 입력하세요. (예: meter:2.5)")
+        raise ConversionError(ErrorCode.E001)
 
     if ":" not in text:
-        raise ConversionError("형식 오류: `단위:값` 형식이 필요합니다. (예: meter:2.5)")
+        raise ConversionError(ErrorCode.E001)
 
     unit, value_str = text.split(":", 1)
     unit = unit.strip()
     value_str = value_str.strip()
 
     if not unit:
-        raise ConversionError("단위명이 비어 있습니다.")
+        raise ConversionError(ErrorCode.E005)
 
     try:
         value = float(value_str)
     except ValueError as exc:
-        raise ConversionError(f"숫자 변환 실패: '{value_str}'") from exc
+        raise ConversionError(ErrorCode.E002) from exc
 
     if value < 0:
-        raise ConversionError("음수는 허용되지 않습니다.")
+        raise ConversionError(ErrorCode.E003)
 
     return unit, value
 
 
-def to_meters(value: float, unit: str) -> float:
+def to_meters(value: float, unit: str, ratios: dict[str, float] | None = None) -> float:
     """Convert any registered unit value to meters (기준 단위)."""
-    ratio = UNIT_RATIOS.get(unit)
+    table = ratios if ratios is not None else UNIT_RATIOS
+    ratio = table.get(unit)
     if ratio is None:
-        raise ConversionError(f"미등록 단위: '{unit}'")
+        raise ConversionError(ErrorCode.E004)
 
     return value / ratio
 
 
-def convert_all(value: float, from_unit: str, *, decimal_places: int = 1) -> list[tuple[str, float]]:
-    """Convert to all other registered units (FR-02, FR-04)."""
-    if from_unit not in UNIT_RATIOS:
-        raise ConversionError(f"미등록 단위: '{from_unit}'")
+def convert_unit(
+    value: float,
+    from_unit: str,
+    to_unit: str,
+    *,
+    decimal_places: int = 1,
+    ratios: dict[str, float] | None = None,
+) -> float:
+    """Convert value between two registered units (FR-05)."""
+    table = ratios if ratios is not None else UNIT_RATIOS
+    meter_value = to_meters(value, from_unit, table)
+    if to_unit not in table:
+        raise ConversionError(ErrorCode.E004)
+    return round(meter_value * table[to_unit], decimal_places)
 
-    meter_value = to_meters(value, from_unit)
+
+def convert_all(
+    value: float,
+    from_unit: str,
+    *,
+    decimal_places: int = 1,
+    units: tuple[str, ...] | None = None,
+    ratios: dict[str, float] | None = None,
+) -> list[tuple[str, float]]:
+    """Convert to all other registered units (FR-02, FR-04)."""
+    table = ratios if ratios is not None else UNIT_RATIOS
+    unit_list = units if units is not None else DEFAULT_UNITS
+    if from_unit not in table:
+        raise ConversionError(ErrorCode.E004)
+
+    meter_value = to_meters(value, from_unit, table)
     results: list[tuple[str, float]] = []
 
-    for unit in DEFAULT_UNITS:
+    for unit in unit_list:
         if unit == from_unit:
             continue
-        converted = round(meter_value * UNIT_RATIOS[unit], decimal_places)
+        converted = round(meter_value * table[unit], decimal_places)
         results.append((unit, converted))
 
     return results
@@ -74,3 +101,34 @@ def convert_from_text(raw: str) -> list[str]:
     unit, value = parse_unit_value(raw)
     rows = convert_all(value, unit)
     return [format_line(value, unit, to_unit, converted) for to_unit, converted in rows]
+
+
+def parse_registration(raw: str) -> tuple[str, float]:
+    """Parse `1 cubit = 0.4572 meter` registration syntax (FR-08)."""
+    text = raw.strip()
+    if "=" not in text:
+        raise ConversionError(ErrorCode.E006)
+
+    left, right = text.split("=", 1)
+    left = left.strip()
+    right = right.strip()
+
+    left_parts = left.split()
+    right_parts = right.split()
+    if len(left_parts) != 2 or len(right_parts) != 2:
+        raise ConversionError(ErrorCode.E006)
+
+    try:
+        coefficient = float(left_parts[0])
+    except ValueError as exc:
+        raise ConversionError(ErrorCode.E006) from exc
+
+    unit_name = left_parts[1]
+    base_amount = float(right_parts[0])
+    base_unit = right_parts[1]
+
+    if base_unit != BASE_UNIT or coefficient <= 0 or base_amount <= 0:
+        raise ConversionError(ErrorCode.E006)
+
+    meter_ratio = coefficient / base_amount
+    return unit_name, meter_ratio
