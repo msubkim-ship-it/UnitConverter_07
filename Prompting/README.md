@@ -34,6 +34,7 @@
 | 30 | [30-session-transcript.md](./30-session-transcript.md) | `/tdd-session` U-FMT-02 (2 turns) | [30-session-report.md](../Report/30-session-report.md) |
 | 31 | [31-session-transcript.md](./31-session-transcript.md) | `/tdd-session` U-CFG-01 (2 turns) | [31-session-report.md](../Report/31-session-report.md) |
 | 32 | [32-session-transcript.md](./32-session-transcript.md) | `/tdd-session` U-REG-01·29 passed (2 turns) | [32-session-report.md](../Report/32-session-report.md) |
+| 33 | [33-session-transcript.md](./33-session-transcript.md) | GUI 스모크 갱신·Export·commit (4 turns) | [33-session-report.md](../Report/33-session-report.md) |
 
 > 01 Source: `agent-transcripts/67a3988e-d761-4cfb-89ff-27d9bf38d81e.jsonl`  
 > 02 Source: `agent-transcripts/30cd2237-92a4-48e6-9c30-5383e9420a45.jsonl`  
@@ -44,4 +45,5 @@
 > 07 Source: `agent-transcripts/f397b246-04cf-4f16-ac7c-65488c639f03.jsonl` (Turn 7~)  
 > 08 Source: `agent-transcripts/ab6c1f8c-0708-44b3-90c2-b83dcea25105.jsonl`  
 > 09 Source: `agent-transcripts/f77b2b1d-425a-40ef-95d7-a540569f5b32.jsonl`  
-> 10 Source: `agent-transcripts/23ee27a2-f7f2-4369-9b5e-7fa7f2c377ba.jsonl`
+> 10 Source: `agent-transcripts/23ee27a2-f7f2-4369-9b5e-7fa7f2c377ba.jsonl`  
+> 33 Source: `agent-transcripts/192bf137-24ff-454f-9eb1-5018a6ac2ded.jsonl`

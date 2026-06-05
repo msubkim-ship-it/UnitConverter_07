@@ -34,3 +34,4 @@
 | 30 | [30-session-report.md](./30-session-report.md) | `/tdd-session` U-FMT-02 GREEN | [30-session-transcript.md](../Prompting/30-session-transcript.md) |
 | 31 | [31-session-report.md](./31-session-report.md) | `/tdd-session` U-CFG-01 GREEN | [31-session-transcript.md](../Prompting/31-session-transcript.md) |
 | 32 | [32-session-report.md](./32-session-report.md) | `/tdd-session` U-REG-01 GREEN·pytest 29 passed | [32-session-transcript.md](../Prompting/32-session-transcript.md) |
+| 33 | [33-session-report.md](./33-session-report.md) | GUI 스모크 갱신(UnitRegistry·E00x·포맷)·pytest 29 passed | [33-session-transcript.md](../Prompting/33-session-transcript.md) |
