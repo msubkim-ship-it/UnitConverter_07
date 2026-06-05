@@ -8,10 +8,12 @@
 | 04 | [04-session-transcript.md](./04-session-transcript.md) | D-LOC-01 GREEN Minimal 세션 (12 turns) | [04-session-report.md](../Report/04-session-report.md) |
 | 05 | [05-session-transcript.md](./05-session-transcript.md) | Golden Master·GREEN PASS 세션 (15 turns) | [05-session-report.md](../Report/05-session-report.md) |
 | 06 | [06-session-transcript.md](./06-session-transcript.md) | REFACTOR Smell 진단 세션 (6 turns) | [06-session-report.md](../Report/06-session-report.md) |
+| 07 | [07-session-transcript.md](./07-session-transcript.md) | 리뷰 반영·REFACTOR Safe #1 세션 (12 turns) | [07-session-report.md](../Report/07-session-report.md) |
 
 > 01 Source: `agent-transcripts/67a3988e-d761-4cfb-89ff-27d9bf38d81e.jsonl`  
 > 02 Source: `agent-transcripts/30cd2237-92a4-48e6-9c30-5383e9420a45.jsonl`  
 > 03 Source: `agent-transcripts/e0974941-33a8-468c-a6e1-ce1e69aeb77e.jsonl`  
 > 04 Source: `agent-transcripts/26bf9f60-aa53-4485-8676-28003d3b50de.jsonl` (Turn 1~22)  
 > 05 Source: `agent-transcripts/26bf9f60-aa53-4485-8676-28003d3b50de.jsonl` (Turn 27~)  
-> 06 Source: `agent-transcripts/f397b246-04cf-4f16-ac7c-65488c639f03.jsonl`
+> 06 Source: `agent-transcripts/f397b246-04cf-4f16-ac7c-65488c639f03.jsonl` (Turn 1~6)  
+> 07 Source: `agent-transcripts/f397b246-04cf-4f16-ac7c-65488c639f03.jsonl` (Turn 7~)

@@ -6,7 +6,7 @@
 
 > **요구사항 상세:** [PRD.md](./PRD.md)  
 > **개발 헌법:** [.cursorrules](./.cursorrules)  
-> **세션 보고:** [Report/](./Report/) · 최신 [06-session-report.md](./Report/06-session-report.md)
+> **세션 보고:** [Report/](./Report/) · 최신 [07-session-report.md](./Report/07-session-report.md)
 
 ---
 
@@ -37,8 +37,8 @@ UnitConverter_07/
 │   │   └── golden/             # Golden Master (U-* GREEN 후, 승인 후 갱신)
 │   ├── _approval.py            # assert_matches_golden() — boundary 전용
 │   └── conftest.py             # 공유 fixture (grid_g1 등)
-├── Report/                     # 세션·회고 보고서 (01~06)
-├── Prompting/                  # 설계 세션 transcript (01~06)
+├── Report/                     # 세션·회고 보고서 (01~07)
+├── Prompting/                  # 설계 세션 transcript (01~07)
 └── .cursor/
     ├── commands/               # TDD slash commands (아래 표)
     ├── skills/unit-converter-tdd/
@@ -261,8 +261,8 @@ Skill: `.cursor/skills/unit-converter-tdd/` · Hook: `sessionStart` → `.cursor
 | [.cursorrules](./.cursorrules) | Agent 개발 헌법 |
 | [.cursor/skills/unit-converter-tdd/](./.cursor/skills/unit-converter-tdd/) | RED/GREEN/REFACTOR 절차 |
 | [PR_SUMMARY.md](./PR_SUMMARY.md) | green→staging PR 본문 (2 commits · pytest 게이트) |
-| [Report/](./Report/) | 세션 보고서 목록 ([README](./Report/README.md)) — 01 설계 ~ **06 refactor-smell** |
-| [Prompting/](./Prompting/) | Transcript Export ([README](./Prompting/README.md)) — 01 ~ **06** |
+| [Report/](./Report/) | 세션 보고서 목록 ([README](./Report/README.md)) — 01 설계 ~ **07 refactor-safe** |
+| [Prompting/](./Prompting/) | Transcript Export ([README](./Prompting/README.md)) — 01 ~ **07** |
 
 ---
 
