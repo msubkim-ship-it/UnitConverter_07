@@ -16,7 +16,7 @@
 
 - entity는 boundary·control·외부 I/O를 import하지 않는다.
 - control은 boundary를 import하지 않는다.
-- 변환 비율·기준 단위 등 MagicConstant는 entity/constants.py 또는 config/units.json 한 곳만 SSOT.
+- MagicConstant(변환 비율·기준 단위명) SSOT는 `entity/constants.py` 단일이다. `config/units.json`은 boundary가 로드하여 control에 주입하는 설정 데이터이며, JSON 수치를 코드·테스트에 리터럴로 복사하지 않는다.
 
 ## Dual-Track TDD
 | Track | 대상 | Mock |

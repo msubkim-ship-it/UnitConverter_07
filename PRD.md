@@ -4,7 +4,7 @@
 |------|------|
 | 프로젝트 | UnitConverter_07 |
 | 도메인 | 길이 단위 변환 (Length Unit Conversion) |
-| 버전 | 0.1.0 (초안) |
+| 버전 | 0.2.0 |
 | 기준 문서 | README.md, `.cursorrules` |
 | 아키텍처 | ECB (boundary → control → entity) |
 | 개발 방식 | Dual-Track TDD |
@@ -54,8 +54,10 @@
 
 ### 2.3 MagicConstant SSOT
 
-- 변환 비율·기준 단위 상수는 `src/entity/constants.py`에 **단일 정의**한다.
+- 변환 비율·기준 단위 상수는 `src/entity/constants.py`에 **단일 정의**한다. (요구 ID: **FR-LOC-01**)
 - `config/units.json`(또는 YAML)은 boundary가 로드하여 control에 주입하며, 수치를 코드·테스트에 **리터럴 복사 금지**.
+- 에러 코드 enum은 `src/entity/exceptions.py`에 **단일 정의**한다. (**FR-LOC-02**)
+- 기준 단위명(`meter`)은 `entity/constants.py`의 `BASE_UNIT` 등으로 **단일 정의**한다. (**FR-LOC-03**)
 
 ---
 
@@ -103,8 +105,24 @@
 | E006 | 등록 문법 오류 | control |
 | E007 | 중복 단위·설정 충돌 | control |
 
-- boundary: 에러 **코드 → 사용자 메시지** 변환·출력만 담당.
+- boundary: 에러 **코드 → 사용자 메시지** 변환·출력만 담당. (요구 ID: **FR-IN-01**~**02**)
 - Logic TC: 메시지 문자열이 아닌 **코드(E00x)** 로 assert.
+- UI TC: boundary가 출력한 **사용자 메시지**·exit code로 assert (stdin/stdout Mock 허용).
+
+### 3.5 SSOT 위치 (Location)
+
+| ID | 요구사항 | 우선순위 | 완료 기준 |
+|----|----------|----------|-----------|
+| FR-LOC-01 | 변환 비율 상수는 `entity/constants.py`만 정의·참조 | P0 | D-LOC-01 PASS; 테스트·src에 `3.28084`/`1.09361` 리터럴 0건 |
+| FR-LOC-02 | E001~E007는 `entity/exceptions.py`의 `ErrorCode`만 정의 | P0 | D-LOC-02 PASS |
+| FR-LOC-03 | 기준 단위명 SSOT (`BASE_UNIT == "meter"`) | P0 | D-LOC-03 PASS |
+
+### 3.6 CLI 입력 표면화 (boundary)
+
+| ID | 요구사항 | 우선순위 | 완료 기준 |
+|----|----------|----------|-----------|
+| FR-IN-01 | 음수 입력 시 FR-10·E003을 CLI에 표면화 (exit ≠ 0) | P0 | U-IN-01 PASS (`meter:-2.5`, 기본 Registry `grid=None`) |
+| FR-IN-02 | `:` 없는 형식 시 FR-11·E001을 CLI에 표면화 | P0 | U-IN-02 PASS (`meter2.5`) |
 
 ---
 
@@ -121,6 +139,8 @@
 | NFR-07 | **입력 검증 TC** — D-ERR-* 전부 PASS | pytest |
 | NFR-08 | **추가 요구 TC** — FR-07~09 + D-REG-* PASS | pytest |
 | NFR-09 | Python ≥ 3.10, pytest ≥ 8.0 | `pyproject.toml` |
+| NFR-10 | **SSOT 위치 TC** — D-LOC-* 전부 PASS | pytest |
+| NFR-11 | **입력 표면화 TC** — U-IN-* (M1) PASS | pytest |
 
 ---
 
@@ -167,7 +187,17 @@ meter:2.5
 1 cubit = 0.4572 meter
 ```
 
-### 6.4 설정 파일 예시 (`config/units.json`)
+### 6.4 입력 검증 예시 (에러)
+
+| 입력 | 코드 | boundary 출력 |
+|------|------|---------------|
+| `meter:-2.5` | E003 | FR-IN-01 — 음수 거부 메시지 |
+| `meter2.5` | E001 | FR-IN-02 — 형식 오류 메시지 |
+| `meter:abc` | E002 | (Logic D-ERR-02 / UI 확장 시) |
+
+### 6.5 설정 파일 (`config/units.json`)
+
+저장소 샘플: [config/units.json](./config/units.json) (boundary 로드용; 수치 정본은 `entity/constants.py`).
 
 ```json
 {
@@ -203,20 +233,38 @@ meter:2.5
 | D-ERR-04 | FR-12 | E004 |
 | D-ERR-05 | FR-13 | E005 |
 | D-ERR-06 | FR-14 | E006 |
+| D-LOC-01 | FR-LOC-01 | `constants` ratio SSOT (row-major, 리터럴 없음) |
+| D-LOC-02 | FR-LOC-02 | `ErrorCode` E001~E007 정의 |
+| D-LOC-03 | FR-LOC-03 | `BASE_UNIT == "meter"` |
 
-파일: `tests/{entity,control,boundary}/test_d_*.py`
+파일: `tests/{entity,control}/test_d_*.py` (D-LOC-*는 주로 `tests/entity/`)
+
+| 묶음 | ID |
+|------|-----|
+| 변환 | D-CONV-01 ~ 06 |
+| 등록 | D-REG-01 ~ 02 |
+| 에러 | D-ERR-01 ~ 06 |
+| SSOT 위치 | D-LOC-01 ~ 03 |
 
 ### 7.2 UI Track (U-*)
 
 | TC ID | FR | 검증 항목 (예시) |
 |-------|-----|------------------|
+| U-IN-01 | FR-IN-01, FR-10 | `meter:-2.5` → E003 메시지, exit ≠ 0 |
+| U-IN-02 | FR-IN-02, FR-11 | `meter2.5` → E001 메시지, exit ≠ 0 |
 | U-CLI-01 | FR-01,04 | CLI 표 출력 |
 | U-FMT-01 | FR-09 | JSON 출력 |
 | U-FMT-02 | FR-09 | CSV 출력 |
 | U-CFG-01 | FR-07 | 설정 파일 로드 |
 | U-REG-01 | FR-08 | 등록 입력 CLI |
 
-파일: `tests/boundary/test_u_*.py` — stdin/stdout·파일 I/O Mock 허용.
+파일: `tests/boundary/test_u_*.py` — stdin/stdout·파일 I/O Mock 허용; control·entity Domain Mock **금지**.
+
+| 묶음 | ID |
+|------|-----|
+| 입력 표면화 | U-IN-01 ~ 02 |
+| CLI·포맷 | U-CLI-01, U-FMT-01/02 |
+| 설정·등록 | U-CFG-01, U-REG-01 |
 
 ### 7.3 TDD 게이트
 
@@ -232,8 +280,8 @@ meter:2.5
 
 | 단계 | 산출물 | FR/NFR |
 |------|--------|--------|
-| M1 기본 | ECB 골격, FR-01~06, FR-10~13 | P0 |
-| M2 품질 | OCP/SRP 리팩터, D-* 전부 PASS | NFR-01~07 |
+| M1 기본 | ECB 골격, FR-01~06, FR-10~13, FR-LOC-01~03, FR-IN-01~02 | P0 |
+| M2 품질 | OCP/SRP 리팩터, D-CONV/ERR/REG/LOC·U-IN PASS | NFR-01~11 |
 | M3 추가 | FR-07~09, FR-14~15, U-* | P1 |
 | M4 통합 | staging merge, README 실행 가이드 정합 | 전체 |
 
@@ -246,7 +294,8 @@ meter:2.5
 | `UnitConverter.py` | 레거시 — boundary thin wrapper로 점진 교체 |
 | `README.md` | 실행·실습 가이드 (본 PRD와 요구사항 동기화) |
 | `.cursorrules` | 개발 헌법 (본 PRD NFR과 정합) |
-| `.cursor/skills/unit-converter-tdd/reference.md` | D-* TC ID SSOT |
+| `.cursor/skills/unit-converter-tdd/reference.md` | D-* TC ID SSOT (D-LOC 포함) |
+| `.cursor/commands/` | `/red-test-plan` ~ `/refactor-safe` TDD 워크플로 |
 
 ---
 
@@ -255,3 +304,4 @@ meter:2.5
 | 버전 | 일자 | 변경 |
 |------|------|------|
 | 0.1.0 | 2026-06-05 | 초안 — README·ECB·Dual-Track·E001~E007 통합 |
+| 0.2.0 | 2026-06-05 | FR-LOC/FR-IN, D-LOC/U-IN TC, NFR-10~11, README·TDD 커맨드 정합 |
