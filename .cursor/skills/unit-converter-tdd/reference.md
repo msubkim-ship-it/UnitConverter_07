@@ -16,3 +16,18 @@
 | D-ERR-04 | 미등록 단위 → E004 |
 | D-ERR-05 | 빈 단위명 → E005 |
 | D-ERR-06 | 등록 문법 오류 → E006 |
+| D-LOC-01 | 변환 비율 `entity/constants.py` SSOT |
+| D-LOC-02 | `ErrorCode` E001~E007 `entity/exceptions.py` SSOT |
+| D-LOC-03 | `BASE_UNIT == "meter"` SSOT |
+
+# U-* UI Track TC ID (PRD §7.2)
+
+| ID | 검증 항목 |
+|----|-----------|
+| U-IN-01 | 음수 입력 → E003 CLI 메시지 |
+| U-IN-02 | `:` 없음 → E001 CLI 메시지 |
+| U-CLI-01 | CLI 표 출력 |
+| U-FMT-01 | JSON 출력 |
+| U-FMT-02 | CSV 출력 |
+| U-CFG-01 | 설정 파일 로드 |
+| U-REG-01 | 등록 입력 CLI |

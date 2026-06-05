@@ -72,7 +72,18 @@ MagicConstant(3.28084, 1.09361 등)는 `entity/constants.py` SSOT만 참조. 테
 
 - Logic TC: 예외 **코드(E00x)** assert — 메시지 문자열 하드코딩 금지
 - UI TC: boundary가 코드→메시지 변환 결과 assert
-- Golden Master(`tests/**/golden/**`) 갱신: **사용자 명시 승인 전까지 diff만 제시**, Agent가 단독 재생성 금지
+- Golden Master(`tests/boundary/golden/**`) 갱신: **U-* GREEN 후**, **사용자 명시 승인 전까지 diff만 제시**, Agent가 단독 재생성 금지. Logic Track `test_d_*`에 golden **혼용 금지**.
+
+---
+
+## Harness — pytest 수집 규칙
+
+| 규칙 | 내용 |
+|------|------|
+| **`tests/{layer}/__init__.py` 금지** | `entity` / `control` / `boundary` 테스트 디렉터리에 `__init__.py`를 두지 않는다 — `src/` 패키지 import shadowing 방지 |
+| 허용 헬퍼 | `tests/conftest.py`, `tests/_approval.py` (tests 루트) |
+| Golden 경로 | `tests/boundary/golden/` — boundary `test_u_*` 전용 |
+| Golden 시점 | `/green-minimal`로 U-* PASS **후** `/golden-master` |
 
 ---
 
@@ -157,3 +168,4 @@ Review Loop 순서: **RED FAIL 확인 → GREEN PASS → PRD/에러코드 대조
 - 헌법: `.cursorrules`
 - D-* TC ID: [reference.md](reference.md)
 - Harness: `pyproject.toml`, `tests/`, `src/`
+- **TC 1건 통합:** `.cursor/commands/tdd-session.md` — RED→GREEN→(REFACTOR)→`/export-session`
