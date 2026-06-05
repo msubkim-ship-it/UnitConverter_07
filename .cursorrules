@@ -1,0 +1,55 @@
+# UnitConverter_07 — ECB + Dual-Track TDD
+
+## 도메인
+길이 단위 변환(Length Unit Conversion).
+입력 `단위:값`(예: meter:2.5)을 받아 등록된 모든 단위로 변환·출력한다.
+기본 단위: meter(기준), feet, yard. 런타임 동적 등록(cubit 등) 및 JSON/YAML 설정 로드 지원.
+
+## ECB 아키텍처
+의존 방향: boundary → control → entity (단방향).
+
+| Layer | 경로 | 책임 |
+|-------|------|------|
+| entity | src/entity/ | Unit, ConversionRatio, 도메인 규칙·상수(SSOT) |
+| control | src/control/ | 변환 유스케이스, Registry, 검증 오케스트레이션 |
+| boundary | src/boundary/ | CLI, InputParser, OutputFormatter, ConfigLoader |
+
+- entity는 boundary·control·외부 I/O를 import하지 않는다.
+- control은 boundary를 import하지 않는다.
+- 변환 비율·기준 단위 등 MagicConstant는 entity/constants.py 또는 config/units.json 한 곳만 SSOT.
+
+## Dual-Track TDD
+| Track | 대상 | Mock |
+|-------|------|------|
+| Logic | entity, control | **도메인 Mock 금지** — 실제 객체·실제 변환 로직으로 검증 |
+| UI | boundary | Mock 허용 — stdin/stdout, 파일 I/O, Formatter 출력 단위 |
+
+브랜치 흐름: spec → red → green → refactoring → staging → main
+
+## 테스트 규칙
+- Logic TC: ID `D-*`, 파일 `tests/{layer}/test_d_*.py`
+- UI TC: ID `U-*`, 파일 `tests/{layer}/test_u_*.py`
+- TC ID는 docstring 또는 pytest mark에 명시 (예: `D-CONV-01`, `U-CLI-01`)
+
+## TDD 사이클 (엄격)
+1. **RED**: 실패하는 테스트만 작성. 구현 코드 추가 금지.
+2. **GREEN**: 테스트 통과에 필요한 최소 구현만.
+3. **REFACTOR**: 테스트 green 유지하며 구조 개선.
+
+금지: assert 완화, `@pytest.mark.skip`, `@pytest.mark.xfail`, 테스트 삭제로 green 만들기.
+MagicConstant(3.28084, 1.09361 등)를 entity/control/boundary/test에 산재 금지 — SSOT 참조만.
+
+## AI 행동 규칙
+- 응답·설명·주석은 **한국어**로 작성한다.
+- TDD 작업 시 매 응답 상단에 Phase/Layer/Track을 선언한다.
+  - 예: `[Phase: RED | Layer: entity | Track: Logic]`
+- spec 브랜치: 설계·인터페이스·TC 목록만. 구현 본문 작성 금지.
+- red 브랜치: tests/만 수정. src/ 구현 금지.
+- green/refactoring: 해당 Phase에 맞는 레이어만 수정.
+- **git commit은 사용자가 명시적으로 요청할 때만** 수행한다.
+- 요청 범위 밖 파일·기능은 추가하지 않는다. Harness 골격 외 레거시 UnitConverter.py는 점진 교체.
+
+## 품질 기준 (PRD)
+- OCP: 단위·포맷·설정 소스 추가 시 기존 entity/control 수정 최소화.
+- SRP: 클래스·모듈당 하나의 변경 이유.
+- 입력 검증: 음수, 잘못된 형식, 미등록 단위 — entity/control에서 정의, boundary에서 표면화.

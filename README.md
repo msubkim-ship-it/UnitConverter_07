@@ -1,83 +1,193 @@
+# Unit Converter (Python)
 
-## Unit Converter (Python)
 ![unit-converter](./unit-converter.jpg)
-### Overview
-- 사용자가 입력한 길이(`단위:값`)를 기반으로, 해당 값을 다른 모든 단위로 변환해 출력하는 프로그램.
-- 새로운 단위를 추가할 때 기존 코드의 변경이 최소화되도록 설계한다.
-- 각 단위 변환 로직은 테스트 코드로 검증한다.
 
-### 가상환경 설정 및 실행
-```bash
-# 가상환경 생성
-python -m venv venv
+길이 단위 변환 CLI. 입력 `단위:값`(예: `meter:2.5`)을 받아 등록된 **다른 모든 단위**로 변환해 출력한다.
 
-# 가상환경 활성화 (Windows)
-venv\Scripts\activate
+> **요구사항 상세:** [PRD.md](./PRD.md)  
+> **개발 헌법:** [.cursorrules](./.cursorrules)
 
-# 가상환경 활성화 (macOS/Linux)
-source venv/bin/activate
+---
 
-# 실행
-python UnitConverter.py
+## Overview
 
-# 가상환경 비활성화
-deactivate
+- 사용자 입력(`단위:값`) 기반 다중 단위 변환
+- **ECB** 아키텍처 + **Dual-Track TDD**로 확장·검증
+- OCP/SRP — 단위·포맷·설정 추가 시 기존 코드 변경 최소화
+- pytest로 변환 정확도·입력 검증 보장
+
+## 프로젝트 구조
+
+```text
+UnitConverter_07/
+├── PRD.md                 # 기능·비기능 요구사항 (FR/NFR)
+├── .cursorrules           # ECB + Dual-Track TDD 헌법
+├── pyproject.toml         # pytest Harness
+├── UnitConverter.py       # 레거시 CLI (점진 교체 예정)
+├── src/
+│   ├── entity/            # 도메인·상수·에러 SSOT
+│   ├── control/           # 변환·Registry·검증
+│   └── boundary/          # CLI·Parser·Formatter·Config
+├── tests/
+│   ├── entity/            # Logic Track — test_d_*
+│   ├── control/
+│   └── boundary/          # UI Track — test_u_*
+└── .cursor/
+    ├── commands/          # /tdd-red, /review-ecb
+    ├── skills/            # unit-converter-tdd
+    └── hooks.json         # sessionStart 컨텍스트 주입
 ```
 
-### 기본 요구사항
-1. 사용자 입력 예시:
-   ```
-   meter:2.5
-   ```
-   → 출력:
-   ```
-   2.5 meter = 8.2 feet
-   2.5 meter = 2.7 yard
-   ...
-   ```
+**의존 방향:** `boundary → control → entity` (단방향)
 
-2. 현재 지원 단위:
-   - meter
-   - feet
-   - yard
+---
 
-3. 새로운 단위가 추가될 때도 기존 코드의 변경이 최소화되도록 할 것.
+## 빠른 시작
 
-4. 각 단위 간 변환이 정확히 계산되도록 테스트 코드를 작성할 것.
+### 가상환경
 
-### 비즈니스 로직
-- `1 meter = 3.28084 feet`
-- `1 meter = 1.09361 yard`
-- feet/yard 간의 비율은 meter 기반으로 계산.
+```bash
+# 생성
+python -m venv venv
 
-### 품질 요구사항
-- OCP를 만족하는 설계
-- SRP를 만족하는 클래스 구성
-- 입력 값 검증 (음수, 잘못된 형식, 없는 단위)
+# 활성화 (Windows)
+venv\Scripts\activate
 
-### 추가 요구사항
-- **설정 외부화**
-   - 변환 비율을 외부 설정 파일(JSON/YAML)에서 로드
-- **동적으로 단위와 비율을 등록할 수 있도록 한다**
-   - 사용자 입력으로 `1 cubit = 0.4572 meter`를 등록하고 사용 가능
-- **출력 포맷 선택 기능** 
-   - JSON / CSV / 표 형태 출력
+# 활성화 (macOS/Linux)
+source venv/bin/activate
 
+# 개발 의존성 (pytest)
+pip install -e ".[dev]"
+```
 
-## 생성형AI를 활용한 Activities (6 시간)
+### 실행 (레거시)
 
-1. 문제 코드 및 기본 요구사항 분석 (0.5시간)
-   - 기본 코드구조, 로직 이해
-2. 기본 요구사항 및 품질 요구사항 구현 (2시간)
-   - OCP를 만족하는 인터페이스 구현 
-   - SRP를 만족하도록 클래스 구현 
-   - 입력값 검증을 위한 구현
-3. TC 구현 (0.5시간)
-   - 단위변환 기능 검증 및 입력 값 검증 TC 작성 
-4. 추가 요구사항 구현 (2시간)
-   - 3개 요구사항 구현 및 TC 작성 
-5. 회고 및 발표 (1시간)
-   - 실습 목표와 달성도
-   - AI를 어떻게 활용했나? 도움이 된 순간과 한계는?
-   - TC를 추가해보면서 개선에 미친 영향, TC 작성 팁
-   - 클린코드와 리팩토링에서 느낀 장점과 어려운점
+```bash
+python UnitConverter.py
+```
+
+### 테스트
+
+```bash
+pytest -v
+pytest tests/entity/ -v          # Logic Track
+pytest tests/boundary/ -v        # UI Track
+```
+
+```bash
+deactivate   # 가상환경 비활성화
+```
+
+---
+
+## 사용 예시
+
+**입력**
+
+```text
+meter:2.5
+```
+
+**출력 (표 형식, 소수 1자리)**
+
+```text
+2.5 meter = 8.2 feet
+2.5 meter = 2.7 yard
+```
+
+**동적 단위 등록 (추가 요구)**
+
+```text
+1 cubit = 0.4572 meter
+```
+
+---
+
+## 기본 요구사항
+
+1. 입력 형식 `단위:값` — 위 예시와 같이 변환·출력
+2. 기본 지원 단위: **meter**, **feet**, **yard**
+3. 새 단위 추가 시 기존 코드 변경 최소화 (**OCP**)
+4. 단위 간 변환 정확도 **테스트 코드**로 검증
+
+## 비즈니스 로직
+
+| 관계 | 비율 |
+|------|------|
+| meter → feet | 1 m = **3.28084** ft |
+| meter → yard | 1 m = **1.09361** yd |
+| feet ↔ yard | meter 기준 간접 계산 |
+
+변환 상수 SSOT: `src/entity/constants.py` (리터럴 산재 금지)
+
+## 품질 요구사항
+
+- **OCP** — Registry·Formatter Strategy로 확장
+- **SRP** — ECB 레이어당 단일 책임
+- **입력 검증** — 음수, 잘못된 형식, 미등록 단위 (에러 코드 E001~E007, [PRD.md](./PRD.md) 참고)
+
+## 추가 요구사항
+
+| 항목 | 설명 |
+|------|------|
+| 설정 외부화 | JSON/YAML에서 변환 비율 로드 |
+| 동적 등록 | `1 cubit = 0.4572 meter` 런타임 등록 |
+| 출력 포맷 | JSON / CSV / 표 |
+
+---
+
+## 개발 방식 (Dual-Track TDD)
+
+| Track | 대상 | 테스트 | Mock |
+|-------|------|--------|------|
+| Logic | entity, control | `D-*` / `test_d_*` | Domain Mock **금지** |
+| UI | boundary | `U-*` / `test_u_*` | stdin/stdout·파일 I/O 허용 |
+
+**브랜치:** `spec → red → green → refactoring → staging → main`
+
+| Phase | 수정 범위 | pytest |
+|-------|-----------|--------|
+| RED | `tests/`만 | exit ≠ 0 (FAIL) |
+| GREEN | `src/` 최소 구현 | exit = 0 (PASS) |
+| REFACTOR | `src/` 구조 개선 | PASS 유지 |
+
+### Cursor 도구
+
+| 도구 | 용도 |
+|------|------|
+| `/tdd-red` | RED Phase — 실패 테스트 먼저 |
+| `/review-ecb` | ECB·계약 위반 리뷰 (코드 수정 없음) |
+| Skill `unit-converter-tdd` | RED/GREEN/REFACTOR 절차 |
+| Hook `sessionStart` | 세션 컨텍스트·`.cursorrules` SSOT 주입 |
+
+D-* TC ID: `.cursor/skills/unit-converter-tdd/reference.md`
+
+---
+
+## 생성형AI를 활용한 Activities (6시간)
+
+1. **문제 코드 및 기본 요구사항 분석** (0.5시간)  
+   - 레거시 `UnitConverter.py` 구조·로직, [PRD.md](./PRD.md) 갭 분석
+2. **기본 요구사항 및 품질 요구사항 구현** (2시간)  
+   - ECB 인터페이스, SRP 클래스, 입력 검증
+3. **TC 구현** (0.5시간)  
+   - 변환·입력 검증 D-* / U-* TC (RED → GREEN)
+4. **추가 요구사항 구현** (2시간)  
+   - 설정 외부화, 동적 등록, 출력 포맷 + TC
+5. **회고 및 발표** (1시간)  
+   - 목표 달성도, AI 활용, TC·리팩터링 회고
+
+---
+
+## 문서
+
+| 파일 | 역할 |
+|------|------|
+| [PRD.md](./PRD.md) | FR/NFR, 에러 계약, 마일스톤 |
+| [.cursorrules](./.cursorrules) | Agent 개발 헌법 |
+| `.cursor/skills/unit-converter-tdd/` | TDD 실행 절차 |
+
+---
+
+작성자: 김명섭  
+리뷰어: 김민주, 김소민, 김연우, 김정균, 김준호
