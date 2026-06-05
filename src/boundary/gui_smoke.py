@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 
+from boundary.error_messages import message_for
 from control.conversion_service import ConversionError, convert_from_text
 from entity.constants import BASE_UNIT, DEFAULT_UNITS, UNIT_RATIOS
 from entity.loc import get_g1_ratios_row_major
@@ -179,10 +180,11 @@ class SmokeTestWindow(QMainWindow):
         try:
             lines = convert_from_text(raw)
         except ConversionError as exc:
-            self._output.setPlainText(f"[오류] {exc.message}")
+            msg = message_for(exc.code)
+            self._output.setPlainText(f"[오류] {msg}")
             self._status.setText("변환 실패 — 입력을 확인하세요.")
             self._status.setStyleSheet("color: #c0392b;")
-            QMessageBox.warning(self, "입력 오류", exc.message)
+            QMessageBox.warning(self, "입력 오류", msg)
             return
 
         self._output.setPlainText("\n".join(lines))
