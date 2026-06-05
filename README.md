@@ -6,7 +6,7 @@
 
 > **요구사항 상세:** [PRD.md](./PRD.md)  
 > **개발 헌법:** [.cursorrules](./.cursorrules)  
-> **세션 보고:** [Report/01-session-report.md](./Report/01-session-report.md)
+> **세션 보고:** [Report/](./Report/) · 최신 [32-session-report.md](./Report/32-session-report.md)
 
 ---
 
@@ -33,9 +33,12 @@ UnitConverter_07/
 ├── tests/
 │   ├── entity/                 # Logic Track — test_d_*
 │   ├── control/
-│   └── boundary/               # UI Track — test_u_*
-├── Report/                     # 세션·회고 보고서
-├── Prompting/                  # 설계 세션 transcript
+│   ├── boundary/               # UI Track — test_u_*
+│   │   └── golden/             # Golden Master (U-* GREEN 후, 승인 후 갱신)
+│   ├── _approval.py            # assert_matches_golden() — boundary 전용
+│   └── conftest.py             # 공유 fixture (grid_g1 등)
+├── Report/                     # 세션·회고 보고서 (01~07)
+├── Prompting/                  # 설계 세션 transcript (01~07)
 └── .cursor/
     ├── commands/               # TDD slash commands (아래 표)
     ├── skills/unit-converter-tdd/
@@ -44,7 +47,27 @@ UnitConverter_07/
 
 **의존 방향:** `boundary → control → entity` (단방향)
 
-> **현재 Harness:** `red` 브랜치에서 `src/`·`tests/` ECB 골격·TC를 RED → GREEN 순으로 채웁니다. 레거시 실행은 `UnitConverter.py`만 사용 가능합니다.
+### 현재 진행 상태
+
+| 항목 | 상태 |
+|------|------|
+| 브랜치 | `refactoring` (D-LOC·D-CONV·D-ERR·D-REG·U-* GREEN) |
+| pytest | **29 passed** — Logic 17 + UI 7 |
+| entity | `constants.py`, `loc.py`, `exceptions.py` |
+| control | `conversion_service.py`, `unit_registry.py` |
+| boundary | `cli.py`, `formatter.py`, `error_messages.py`, `config_loader.py` |
+| Golden Master | U-* GREEN 완료 — baseline 승인 후 `tests/boundary/golden/` |
+| 레거시 | `UnitConverter.py` — ECB `boundary/cli.py` 병행 |
+| PR | [PR_SUMMARY.md](./PR_SUMMARY.md) — green→staging, **2 commits** 기준 |
+
+### Harness — `tests/{layer}/__init__.py` 재생성 금지
+
+`tests/entity/`, `tests/control/`, `tests/boundary/` 아래 **`__init__.py`를 만들지 않는다.**
+
+| 이유 | pytest가 `tests/entity/` 등을 Python 패키지로 등록하면 `import entity` 시 `src/entity` 대신 테스트 디렉터리가 먼저 로드됨 |
+| 증상 | `ModuleNotFoundError: No module named 'entity.constants'` (04 세션) |
+| 허용 | `tests/conftest.py`, `tests/_approval.py` 등 **tests 루트** 헬퍼만 |
+| Golden | Logic `test_d_*`에 golden **금지** — boundary `test_u_*` + `/golden-master`만 |
 
 ---
 
@@ -74,8 +97,17 @@ python UnitConverter.py
 
 ```bash
 pytest -v
-pytest tests/entity/ -v          # Logic Track (D-*)
-pytest tests/boundary/ -v        # UI Track (U-*)
+pytest tests/entity/ -v                              # Logic Track (D-*)
+pytest tests/boundary/ -v                            # UI Track (U-*)
+pytest tests/entity/test_d_loc_01.py::test_d_loc_01 -v   # D-LOC-01 GREEN
+```
+
+**Golden Master** — boundary **U-* GREEN** 후에만 (`tests/boundary/golden/`):
+
+```bash
+# 예: U-CLI-01 GREEN 이후, 사용자 승인 후 baseline 생성
+UPDATE_GOLDEN=1 pytest tests/boundary/test_u_cli.py::test_u_cli_01 -v
+pytest tests/boundary/test_u_cli.py::test_u_cli_01 -v   # matched 확인
 ```
 
 ```bash
@@ -157,24 +189,32 @@ meter:2.5
 
 ### TDD 워크플로 (Cursor Commands)
 
-권장 순서:
+**TC당 1채팅 (권장):**
 
 ```text
-/red-test-plan → /red-skeleton → /green-minimal → /golden-master → /refactor-smell → /refactor-safe
+/tdd-session D-LOC-02
+```
+
+Phase별 수동 진행:
+
+```text
+/red-test-plan → /red-skeleton → /green-minimal → /golden-master → /refactor-smell → /refactor-safe → /export-session
 ```
 
 | Command | Phase | 역할 |
 |---------|-------|------|
+| `/tdd-session <TC-ID>` | red→green→refactor→export | **TC 1건** 통합 사이클 + 세션 Export |
 | `/red-test-plan` | red-plan | TC·FR·파일 계획표만 (코드 없음) |
 | `/red-skeleton` | red | `tests/` 실패 골격 + pytest FAIL |
 | `/green-minimal` | green | `src/` 최소 구현 + pytest PASS |
-| `/golden-master` | green/refactor | boundary 출력 스냅샷 (승인 후 golden) |
+| `/golden-master` | green/refactor | **boundary U-*** 출력 스냅샷 (승인 후 golden) |
 | `/refactor-smell` | 진단 | 스멜 표만 (수정 없음) |
 | `/refactor-safe` | refactor | `src/` 리팩터, tests 동결 |
 | `/tdd-red` | red | plan+skeleton 단일 RED (레거시) |
 | `/review-ecb` | 리뷰 | ECB·계약 위반 표 (수정 없음) |
+| `/export-session` | ARRR | Report·Transcript Export (코드 수정 금지) |
 
-Skill: `.cursor/skills/unit-converter-tdd/` · Hook: `sessionStart` → `.cursorrules` 주입
+Skill: `.cursor/skills/unit-converter-tdd/` · `.cursor/skills/unit-converter-docs/` · Hook: `sessionStart` → `.cursorrules` 주입
 
 ### 테스트 ID (요약)
 
@@ -188,9 +228,11 @@ Skill: `.cursor/skills/unit-converter-tdd/` · Hook: `sessionStart` → `.cursor
 
 **Logic — SSOT 위치 (PRD §3.5·§7.1)**
 
-| ID | 검증 |
-|----|------|
-| D-LOC-01 ~ 03 | `constants` / `exceptions` / `BASE_UNIT` SSOT |
+| ID | 검증 | 상태 |
+|----|------|------|
+| D-LOC-01 | `constants` ratio SSOT (G1 row-major) | ✅ GREEN |
+| D-LOC-02 | `exceptions` E001~E007 SSOT | ✅ GREEN |
+| D-LOC-03 | `BASE_UNIT == "meter"` | ✅ GREEN |
 
 **UI — PRD §7.2**
 
@@ -227,8 +269,9 @@ Skill: `.cursor/skills/unit-converter-tdd/` · Hook: `sessionStart` → `.cursor
 | [PRD.md](./PRD.md) | FR/NFR, E001~E007, 마일스톤 |
 | [.cursorrules](./.cursorrules) | Agent 개발 헌법 |
 | [.cursor/skills/unit-converter-tdd/](./.cursor/skills/unit-converter-tdd/) | RED/GREEN/REFACTOR 절차 |
-| [Report/](./Report/) | 세션 보고서 ([01](./Report/01-session-report.md), [02](./Report/02-session-report.md)) |
-| [Prompting/](./Prompting/) | 세션 Transcript Export |
+| [PR_SUMMARY.md](./PR_SUMMARY.md) | green→staging PR 본문 (2 commits · pytest 게이트) |
+| [Report/](./Report/) | 세션 보고서 목록 ([README](./Report/README.md)) — 01 설계 ~ **10 D-LOC-02** |
+| [Prompting/](./Prompting/) | Transcript Export ([README](./Prompting/README.md)) — 01 ~ **10** |
 
 ---
 
